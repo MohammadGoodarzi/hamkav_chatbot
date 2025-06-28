@@ -9,9 +9,9 @@ RUNNING_MODE = os.getenv("RUNNING_MODE", "polling")  # polling یا webhook
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", None)
 
 DB_CONFIG = {
-    "user": "your_db_user",
-    "password": "your_db_password",
-    "host": "localhost",
-    "port": "5432",
-    "database": "your_db_name",
+    "db_user": "postgres",
+    "db_password": "1234",
+    "db_host": "localhost",
+    "db_port": "5432",
+    "db_database": "social_chat_bot",
 }

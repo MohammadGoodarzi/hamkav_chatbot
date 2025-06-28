@@ -11,19 +11,19 @@ bot_api = BotAPI()
 last_update_id = None
 
 async def polling_loop():
-    global last_update_id
+    global last_update_id  
     while True:
         try:
             updates_resp = await bot_api.get_updates(offset=last_update_id, timeout=20)
-            # print("Updates response:", updates_resp)
             if "result" in updates_resp:
                 for update in updates_resp["result"]:
                     last_update_id = update["update_id"] + 1
                     await handle_update(update)
+                    print("Got New Message",updates_resp["result"][0]["message"]["from"]["username"], datetime.now())
         except Exception as e:
             print("Error in polling:", datetime.now() ,e)
             # traceback.print_exc()  # چاپ کامل استک‌ترس
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
 
 async def handle_webhook(request: Request):
     data = await request.json()

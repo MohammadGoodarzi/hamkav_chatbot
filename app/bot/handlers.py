@@ -1,7 +1,7 @@
 from app.bot.api import BotAPI
 from telegram import ReplyKeyboardMarkup
 import json
-from .data_layer import questions
+from ..db.data_layer import questions
 
 bot_api = BotAPI()
 
