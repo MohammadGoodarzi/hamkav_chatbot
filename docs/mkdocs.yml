@@ -1,0 +1,58 @@
+site_name: مستندات من
+
+theme:
+  name: material
+  custom_dir: overrides
+  language: fa  # فعال‌سازی زبان فارسی
+  direction: rtl  # راست به چپ (RTL)
+  palette:
+    - scheme: default
+      primary: black  # تغییر رنگ نوار بالایی به مشکی
+      toggle:
+        icon: material/weather-sunny
+        name: حالت روز
+    - scheme: slate
+      primary: black  # مشکی در حالت تاریک
+      toggle:
+        icon: material/weather-night
+        name: حالت شب
+  features:
+    # - navigation.tabs
+    - navigation.sections
+    - search.suggest
+  font:
+    text: Vazirmatn  # استفاده از فونت Vazirmatn
+    code: Vazirmatn  # فونت کدها هم Vazirmatn باشد
+
+# اضافه کردن فونت Vazirmatn از CDN
+extra_css:
+  - https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts.css
+
+# فعال‌سازی RTL برای محتوا
+markdown_extensions:
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+# مسیر مستندات
+docs_dir: docs
+
+# تنظیمات SEO برای فارسی
+site_description: "مستندات پروژه به زبان فارسی"
+copyright: "کپی‌رایت © ۲۰۲۳"
+site_author: "مهدی گودرزی"
+copyright: "© ۲۰۲۵ مهدی گودرزی – محصول: هم‌کاو | [گیت‌هاب](https://github.com/username/project)"
+
+# پلاگین‌های ضروری
+plugins:
+  - search
+  - i18n:
+      default_language: fa
+      languages:
+        fa: فارسی

@@ -1,7 +1,8 @@
 from app.bot.api import BotAPI
 from telegram import ReplyKeyboardMarkup
 import json
-from ..db.data_layer import questions
+# from ..db.data_layer import questions
+from ..db.data_layer import getQuestions
 
 bot_api = BotAPI()
 
@@ -9,6 +10,10 @@ bot_api = BotAPI()
 user_states = {}  # chat_id: {"step": int, "answers": list[str]}
 
 async def handle_update(update: dict):
+    
+    
+    questions = await getQuestions()
+    
     if "message" not in update:
         return
 
@@ -78,3 +83,25 @@ async def handle_update(update: dict):
 
     # هر پیام دیگه:
     await bot_api.send_message(chat_id, "برای شروع لطفاً /start را ارسال کن یا روی دکمه‌ی «تکمیل فرم» کلیک کن.")
+
+
+
+# async def telegram_webhook(data: UserMessage):
+#     user_id = data.user_id
+#     message = data.message
+
+#     # 1. آیا منتظر پاسخ هستیم؟
+#     next_q = await get_next_question(user_id)
+#     if not next_q:
+#         return {"reply": "✅ همه سوالات پاسخ داده شده."}
+
+#     # اگر کاربر در حال پاسخ‌دهی است
+#     await save_answer(user_id, next_q["id"], message)
+
+#     # سوال بعدی
+#     next_q = await get_next_question(user_id)
+#     if next_q:
+#         return {"reply": next_q["text"]}
+#     else:
+#         return {"reply": "✅ همه سوالات ثبت شدند. ممنون!"}
+    

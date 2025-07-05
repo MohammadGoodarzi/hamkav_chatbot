@@ -13,12 +13,14 @@ app/
 ├── config.py           # پیکربندی
 ```
 
-
 ## INSTALLING
+
 ### install requrements in python
+
 pip install -r requirements.txt
 
 ### .env files
+
 create a .env file in root of project that have below items:
 
 ```
@@ -28,8 +30,11 @@ RUNNING_MODE=polling # مقدارهای ممکن: webhook یا polling
 WEBHOOK_URL=https://yourdomain.com/webhook
 ```
 
-
-
 ## RUNNING APP
+
 uvicorn app.main:app --reload
 
+## TODO
+
+* [ ] Complete User Function
+* [ ]
