@@ -1,5 +1,5 @@
 import asyncpg
-from typing import Dict, List, Any, Union
+from typing import Dict, List, Any, Union, Optional
 import logging
 
 # تنظیم لاگ برای نوشتن در فایل
@@ -10,31 +10,86 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'        # فرمت تاریخ و زمان
 )
 
+
+
 # لاگ تنظیم شده در بالا قرار دارد
 
 class Database:
-    def __init__(self, connection_params: Dict[str, Any]):
-        self.connection_params = connection_params
-        self.pool = None
+    """
+    sample 1 ::
+    
+    async with Database() as db:
+        # استفاده از کانفیگ پیش‌فرض
+        results = await db.pool.fetch("SELECT * FROM users")
+        
+      
+    sample 2 ::
+        
+    custom_config = {
+    "user": "admin",
+    "password": "secure_pass",
+    "database": "production_db",
+    "host": "db.server.com"
+    }
+
+    async with Database(custom_config) as db:
+        # استفاده از کانفیگ سفارشی
+        results = await db.pool.fetch("SELECT * FROM orders")
+        
+    """
+    
+    
+    # متغیر کلاس - فقط یک نمونه از کلاس می‌تونه وجود داشته باشه
+    _instance = None
+    _pool = None
+    _default_config = {
+        "user": "postgres",
+        "password": "1234",
+        "database": "social_chat_bot",
+        "host": "localhost"
+    }
+
+    def __new__(cls, config: Optional[Dict[str, Any]] = None):
+        if not cls._instance:
+            cls._instance = super().__new__(cls)
+            cls._config = config if config else cls._default_config
+        return cls._instance
+    
+    def _initialize(self, config: Optional[Dict[str, Any]]):
+        """
+        متد مقداردهی اولیه - فقط یک بار صدا زده می‌شه
+        """
+        self.pool = None  # متغیر برای نگهداری connection pool
+        
+        # اگر کانفیگ ارسال شده از آن استفاده کن، در غیر اینصورت از پیش‌فرض
+        self.config = config if config else self._default_config
+        
+    async def __aenter__(self):
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
+        
 
     async def connect(self):
-        try:
-            self.pool = await asyncpg.create_pool(**self.connection_params)
-        except Exception as e:
-            logging.error(f"Connection Error: {e}")
+        """ایجاد connection pool"""
+        if self._pool is None:
+            self._pool = await asyncpg.create_pool(**self._config)
+        return self
 
     async def close(self):
-        try:
-            if self.pool:
-                await self.pool.close()
-        except Exception as e:
-            logging.error(f"Close Error: {e}")
+        """بستن connection pool"""
+        if self._pool:
+            await self._pool.close()
+            self._pool = None
 
     async def execute_select(self, query: str, params: Dict[str, Any] = None) -> List[Dict[str, Any]]:
         try:
             if not self.pool:
                 logging.error("Database pool is not initialized.")
-                return []
+                # return []
+                return None
 
             async with self.pool.acquire() as conn:
                 try:
@@ -100,12 +155,28 @@ class Database:
                         
         except asyncpg.PostgresError as e:
             # raise RuntimeError(f"خطای دیتابیس در اجرای UPDATE: {str(e)}")
+            print("error in log file!")
             logging.error(f" خطای دیتابیس در اجرای UPDATE: {e}")
-        
-        
-        
-    
-    
-    
-        
-        
+
+    async def execute_insert(self, query: str, params: Dict[str, Any] = None, id_column: str = "id") -> Any:
+        """اجرای کوئری INSERT و برگرداندن ID"""
+        if self._pool is None:
+            raise RuntimeError("Connection pool is not initialized. Call connect() first.")
+
+        try:
+            # print(query)
+            async with self._pool.acquire() as conn:
+                # اضافه کردن RETURNING اگر وجود ندارد
+                if f"RETURNING {id_column}" not in query.upper():
+                    query = f"{query.rstrip(';')} RETURNING {id_column};"
+
+                if params:
+                    stmt = await conn.prepare(query)
+                    param_names = stmt.get_parameters()
+                    params_list = [params.get(name) for name in param_names]
+                    return await stmt.fetchval(*params_list)
+                return await conn.fetchval(query)
+
+        except asyncpg.PostgresError as e:
+            print(f"Database error: {e}")
+            raise RuntimeError(f"خطا در اجرای INSERT: {str(e)}")

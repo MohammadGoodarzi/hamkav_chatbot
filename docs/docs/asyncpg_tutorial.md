@@ -320,3 +320,72 @@ result = await conn.fetchrow(f'SELECT * FROM users WHERE id = {user_id}')
 | `async with conn.transaction()` | استفاده از Transaction |
 
 این ساختار به شما کمک می‌کند تا به راحتی با asyncpg کار کنید و عملیات پایگاه داده را به صورت ایمن و کارآمد انجام دهید.
+
+
+
+
+# مدیریت اتصالات دیتابیس در پایتون با asyncpg
+
+## روش امن اتصال به دیتابیس
+
+### 1. استفاده از Context Manager (`async with`)
+
+**مزایا:**
+- بستن خودکار اتصال
+- مدیریت خطاهای خودکار
+- کد تمیز و خوانا
+
+**پیاده‌سازی کلاس پایه:**
+```python
+import asyncpg
+
+class Database:
+    def __init__(self, dsn):
+        self.dsn = dsn
+        self.pool = None
+
+    async def connect(self):
+        self.pool = await asyncpg.create_pool(self.dsn)
+
+    async def close(self):
+        if self.pool:
+            await self.pool.close()
+
+    async def __aenter__(self):
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
+
+## مثال استفاده
+async def main():
+    db_config = {
+        'user': 'postgres',
+        'password': 'password',
+        'database': 'test',
+        'host': 'localhost'
+    }
+    
+    async with Database(db_config) as db:
+        # انجام عملیات دیتابیس
+        result = await db.pool.fetch('SELECT * FROM users')
+        print(result)
+    
+    # اتصال اینجا خودکار بسته شده
+
+
+### 2. بدون استفاده از Context Manager (`async with`)    
+        
+ حتما باید در بلوک try/finally استفاده شود
+خطر فراموشی بستن اتصال وجود دارد
+
+
+        async def manual_example():
+    db = Database(db_config)
+    try:
+        await db.connect()
+        result = await db.pool.fetch('SELECT * FROM products')
+        print(result)
+    finally:
+        await db.close()  # بستن اجباری اتصال

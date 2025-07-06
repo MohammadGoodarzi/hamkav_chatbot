@@ -17,7 +17,7 @@ async def polling_loop():
     while True:
         try:
             updates_resp = await bot_api.get_updates(offset=last_update_id, timeout=20)   
-            print(updates_resp) 
+            # print(updates_resp) 
             if "result" in updates_resp:
                 for update in updates_resp["result"]:
                     last_update_id = update["update_id"] + 1
