@@ -19,6 +19,8 @@ app/
 
 pip install -r requirements.txt
 
+Create a database with name "social_chat_bot"
+
 ### .env files
 
 create a .env file in root of project that have below items:
